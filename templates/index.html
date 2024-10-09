@@ -11,8 +11,12 @@
 
     <!-- Sign-In Form -->
     <form method="POST" action="/login">
+        <label for="username">Enter Username:</label>
+        <input type="text" id="username" name="username" required>
+        
         <label for="password">Enter Password:</label>
         <input type="password" id="password" name="password" required>
+        
         <input type="submit" value="Login">
     </form>
 
@@ -24,8 +28,8 @@
     </form>
 
     <script>
-        // If the user is logged in, show the search form
-        const loggedIn = true; // Example flag, replace with actual logic
+        // Replace this logic with actual login status
+        const loggedIn = false; // Set to true after login success
         if (loggedIn) {
             document.getElementById('search-form').style.display = 'block';
         }
