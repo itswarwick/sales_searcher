@@ -8,6 +8,7 @@ load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY') or 'secret_key_here'
+app.config['TEMPLATES_AUTO_RELOAD'] = True  # Enable template auto-reload
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -65,4 +66,5 @@ def search():
     return render_template('search.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.getenv('PORT', 5000))  # Use the 'PORT' environment variable
+    app.run(host='0.0.0.0', port=port)
