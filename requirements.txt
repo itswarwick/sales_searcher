@@ -1,0 +1,6 @@
+Flask
+Flask-Login
+requests
+pandas
+python-dotenv
+gunicorn
