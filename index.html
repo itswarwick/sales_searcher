@@ -8,5 +8,27 @@
 <body>
     <h1>Welcome to Sales Searcher</h1>
     <p>This is a simple GitHub Pages site for testing and showcasing sales search functionalities.</p>
+
+    <!-- Sign-In Form -->
+    <form method="POST" action="/login">
+        <label for="password">Enter Password:</label>
+        <input type="password" id="password" name="password" required>
+        <input type="submit" value="Login">
+    </form>
+
+    <!-- Search Form -->
+    <form method="POST" action="/search" style="display: none;" id="search-form">
+        <label for="item">Search for an item:</label>
+        <input type="text" id="item" name="item" placeholder="Enter item name" required>
+        <input type="submit" value="Search">
+    </form>
+
+    <script>
+        // If the user is logged in, show the search form
+        const loggedIn = true; // Example flag, replace with actual logic
+        if (loggedIn) {
+            document.getElementById('search-form').style.display = 'block';
+        }
+    </script>
 </body>
 </html>

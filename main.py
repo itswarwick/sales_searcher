@@ -1,16 +1,21 @@
 import requests
 import pandas as pd
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env
+load_dotenv()
 
 # WooCommerce API credentials
-consumer_key = 'ck_7822d16ee5153756e6d5f0bbfcef3e9ec1d19f0d'
-consumer_secret = 'cs_db796e329d7a7d32acf244b6cc0cffc21a6d01dd'
-api_url = "https://southernwines.com/wp-json/wc/v3/orders"
+consumer_key = os.getenv('CONSUMER_KEY')
+consumer_secret = os.getenv('CONSUMER_SECRET')
+api_url = os.getenv('API_URL')
 
 # Parameters for the API request
 params = {
-    'per_page': 100,  # Max number of orders per page (100 is the limit)
-    'after': '2023-04-03T00:00:00',  # Fetch orders after April 3, 2023
-    'page': 1  # Start with the first page
+    'per_page': 100,
+    'after': '2023-04-03T00:00:00',
+    'page': 1
 }
 
 # List to store all the orders
@@ -18,21 +23,13 @@ all_orders = []
 
 # Fetch all pages of orders
 while True:
-    # API request to fetch orders for the current page
     response = requests.get(api_url, auth=(consumer_key, consumer_secret), params=params)
-
-    # Check if the request was successful
+    
     if response.status_code == 200:
         orders = response.json()
-
-        # Break the loop if no more orders are returned
         if not orders:
             break
-
-        # Append the current batch of orders to the list
         all_orders.extend(orders)
-
-        # Move to the next page
         params['page'] += 1
     else:
         print(f"Failed to retrieve orders. Status code: {response.status_code}")
@@ -43,11 +40,10 @@ order_data = []
 
 # Loop through each order and extract relevant details
 for order in all_orders:
-    email = order['billing']['email']  # Customer's email
-    order_date = order['date_created']  # Date of the order
-    products = ", ".join([item['name'] for item in order['line_items']])  # Product names
+    email = order['billing']['email']
+    order_date = order['date_created']
+    products = ", ".join([item['name'] for item in order['line_items']])
     
-    # Append the extracted data to the list
     order_data.append({
         'Customer Email': email,
         'Order Date': order_date,

@@ -1,0 +1,20 @@
+<form method="POST">
+    <input type="text" id="search" name="item" placeholder="Search for an item" onkeyup="searchItem()">
+    <div id="suggestions"></div>
+    <input type="submit" value="Search">
+</form>
+
+<script>
+    function searchItem() {
+        var query = document.getElementById('search').value;
+        fetch('/autocomplete?q=' + query)
+            .then(response => response.json())
+            .then(data => {
+                var suggestions = document.getElementById('suggestions');
+                suggestions.innerHTML = "";
+                data.forEach(function(item) {
+                    suggestions.innerHTML += "<div>" + item + "</div>";
+                });
+            });
+    }
+</script>
