@@ -42,14 +42,45 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
+# Refresh token function to get a new access token when expired
+def refresh_access_token():
+    url = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
+    auth_header = f"Basic {os.getenv('CLIENT_ID')}:{os.getenv('CLIENT_SECRET')}"
+    
+    headers = {
+        "Authorization": auth_header,
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+    
+    payload = {
+        "grant_type": "refresh_token",
+        "refresh_token": os.getenv("REFRESH_TOKEN")
+    }
+    
+    response = requests.post(url, headers=headers, data=payload)
+    token_info = response.json()
+    
+    if response.status_code == 200:
+        os.environ['ACCESS_TOKEN'] = token_info['access_token']
+        return token_info['access_token']
+    else:
+        print("Error refreshing access token")
+        return None
+
+# Function to retrieve access token, refresh it if needed
+def get_access_token():
+    access_token = os.getenv('ACCESS_TOKEN')
+    if access_token is None:
+        return refresh_access_token()
+    return access_token
+
 # Query QuickBooks API for products
 def query_quickbooks(query):
     api_url = os.getenv('API_URL')  # QuickBooks API URL
-    consumer_key = os.getenv('CONSUMER_KEY')
-    consumer_secret = os.getenv('CONSUMER_SECRET')
-
+    access_token = get_access_token()  # Ensure we have a valid token
+    
     headers = {
-        'Authorization': 'Bearer ' + os.getenv('ACCESS_TOKEN'),  # Use OAuth token
+        'Authorization': f'Bearer {access_token}',  # Use OAuth token
         'Accept': 'application/json'
     }
     
@@ -59,13 +90,14 @@ def query_quickbooks(query):
     }
     
     response = requests.get(api_url, headers=headers, params=params)
-
+    
     if response.status_code == 200:
         data = response.json()
-        # Extract the relevant product names
+        # Extract relevant product names
         products = [item['name'] for item in data.get('products', [])]
         return products
     else:
+        print("Error fetching data from QuickBooks API")
         return []
 
 @app.route('/autocomplete', methods=['GET'])
