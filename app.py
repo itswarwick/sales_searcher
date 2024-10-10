@@ -1,3 +1,4 @@
+import requests
 from flask import Flask, render_template, redirect, url_for, request, session, jsonify, send_file
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
 from dotenv import load_dotenv
@@ -8,7 +9,7 @@ load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY') or 'secret_key_here'
-app.config['TEMPLATES_AUTO_RELOAD'] = True  # Enable template auto-reload
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -41,12 +42,38 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
+# Query QuickBooks API for products
+def query_quickbooks(query):
+    api_url = os.getenv('API_URL')  # QuickBooks API URL
+    consumer_key = os.getenv('CONSUMER_KEY')
+    consumer_secret = os.getenv('CONSUMER_SECRET')
+
+    headers = {
+        'Authorization': 'Bearer ' + os.getenv('ACCESS_TOKEN'),  # Use OAuth token
+        'Accept': 'application/json'
+    }
+    
+    params = {
+        'query': query,
+        'limit': 10  # Limit the number of results for performance
+    }
+    
+    response = requests.get(api_url, headers=headers, params=params)
+
+    if response.status_code == 200:
+        data = response.json()
+        # Extract the relevant product names
+        products = [item['name'] for item in data.get('products', [])]
+        return products
+    else:
+        return []
+
 @app.route('/autocomplete', methods=['GET'])
 @login_required
 def autocomplete():
     query = request.args.get('q')
-    # Call QuickBooks API to get product suggestions here
-    suggestions = ['Product1', 'Product2']  # Dummy data
+    # Use the query_quickbooks function to get product suggestions from QuickBooks API
+    suggestions = query_quickbooks(query)
     return jsonify(suggestions)
 
 @app.route('/search', methods=['GET', 'POST'])
@@ -55,8 +82,8 @@ def search():
     if request.method == 'POST':
         item = request.form['item']
         # Call QuickBooks API to retrieve customers and orders for the selected item
-        orders = query_quickbooks(item)  # Implement QuickBooks query here
-
+        orders = query_quickbooks(item)  # You might need to adjust this for order data
+        
         # Create a CSV file with customer details and order history
         df = pd.DataFrame(orders)
         csv_path = 'customer_orders.csv'
