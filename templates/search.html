@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Item Search</title>
+    <title>Search Page</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,21 +17,38 @@
             height: 100vh;
         }
 
+        h1 {
+            color: #333;
+        }
+
+        p {
+            color: #666;
+        }
+
         .form-container {
             background-color: #fff;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            width: 350px;
+            width: 340px;
             text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+            text-align: left;
         }
 
         input[type="text"] {
             width: 100%;
             padding: 10px;
-            margin: 10px 0;
+            margin: 10px 0 20px 0;
             border: 1px solid #ccc;
             border-radius: 4px;
+            box-sizing: border-box;
         }
 
         input[type="submit"] {
@@ -41,7 +58,9 @@
             border: none;
             border-radius: 4px;
             color: #fff;
+            font-weight: bold;
             cursor: pointer;
+            box-sizing: border-box;
         }
 
         input[type="submit"]:hover {
@@ -54,22 +73,23 @@
         }
 
         #suggestions div {
-            padding: 8px;
-            background-color: #f4f4f4;
-            border-bottom: 1px solid #ddd;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            cursor: pointer;
         }
 
         #suggestions div:hover {
-            background-color: #e2e2e2;
-            cursor: pointer;
+            background-color: #f0f0f0;
         }
     </style>
 </head>
 <body>
     <div class="form-container">
-        <h2>Search for an item</h2>
+        <h1>Search for an item</h1>
         <form method="POST">
-            <input type="text" id="search" name="item" placeholder="Search for an item" onkeyup="searchItem()" autocomplete="off">
+            <input type="text" id="search" name="item" placeholder="Search for an item" onkeyup="searchItem()">
             <div id="suggestions"></div>
             <input type="submit" value="Search">
         </form>
@@ -78,25 +98,17 @@
     <script>
         function searchItem() {
             var query = document.getElementById('search').value;
-            if (query.length > 0) {
-                fetch('/autocomplete?q=' + query)
-                    .then(response => response.json())
-                    .then(data => {
-                        var suggestions = document.getElementById('suggestions');
-                        suggestions.innerHTML = "";
-                        data.forEach(function(item) {
-                            var div = document.createElement('div');
-                            div.textContent = item;
-                            div.onclick = function() {
-                                document.getElementById('search').value = item;
-                                suggestions.innerHTML = ""; // Clear suggestions once selected
-                            };
-                            suggestions.appendChild(div);
-                        });
+            fetch('/autocomplete?q=' + query)
+                .then(response => response.json())
+                .then(data => {
+                    var suggestions = document.getElementById('suggestions');
+                    suggestions.innerHTML = "";
+                    data.forEach(function(item) {
+                        var div = document.createElement('div');
+                        div.textContent = item;
+                        suggestions.appendChild(div);
                     });
-            } else {
-                document.getElementById('suggestions').innerHTML = "";
-            }
+                });
         }
     </script>
 </body>
