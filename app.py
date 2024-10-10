@@ -1,3 +1,4 @@
+from quickbooks import QuickBooks
 import requests
 from flask import Flask, render_template, redirect, url_for, request, session, jsonify, send_file
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
