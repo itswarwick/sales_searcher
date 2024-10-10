@@ -1,20 +1,48 @@
 <form method="POST">
-    <input type="text" id="search" name="item" placeholder="Search for an item" onkeyup="searchItem()">
-    <div id="suggestions"></div>
+    <input type="text" id="search" name="item" placeholder="Search for an item" onkeyup="searchItem()" autocomplete="off">
+    <div id="suggestions" class="suggestions-list"></div>
     <input type="submit" value="Search">
 </form>
+
+<style>
+    .suggestions-list {
+        border: 1px solid #ccc;
+        max-height: 150px;
+        overflow-y: auto;
+        position: absolute;
+        background-color: #fff;
+        width: 300px;
+    }
+    .suggestions-list div {
+        padding: 8px;
+        cursor: pointer;
+    }
+    .suggestions-list div:hover {
+        background-color: #f0f0f0;
+    }
+</style>
 
 <script>
     function searchItem() {
         var query = document.getElementById('search').value;
-        fetch('/autocomplete?q=' + query)
-            .then(response => response.json())
-            .then(data => {
-                var suggestions = document.getElementById('suggestions');
-                suggestions.innerHTML = "";
-                data.forEach(function(item) {
-                    suggestions.innerHTML += "<div>" + item + "</div>";
+        if (query.length > 0) {
+            fetch('/autocomplete?q=' + query)
+                .then(response => response.json())
+                .then(data => {
+                    var suggestions = document.getElementById('suggestions');
+                    suggestions.innerHTML = "";
+                    data.forEach(function(item) {
+                        var suggestion = document.createElement('div');
+                        suggestion.innerText = item;
+                        suggestion.onclick = function() {
+                            document.getElementById('search').value = item;
+                            suggestions.innerHTML = ""; // Clear suggestions after selection
+                        };
+                        suggestions.appendChild(suggestion);
+                    });
                 });
-            });
+        } else {
+            document.getElementById('suggestions').innerHTML = ""; // Clear if input is empty
+        }
     }
 </script>
