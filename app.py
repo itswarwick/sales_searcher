@@ -61,8 +61,22 @@ def refresh_access_token():
     token_info = response.json()
     
     if response.status_code == 200:
-        os.environ['ACCESS_TOKEN'] = token_info['access_token']
-        return token_info['access_token']
+        new_access_token = token_info['access_token']
+        new_refresh_token = token_info.get('refresh_token', os.getenv("REFRESH_TOKEN"))  # May not always return a new refresh token
+        
+        # Update the environment with the new tokens
+        os.environ['ACCESS_TOKEN'] = new_access_token
+        os.environ['REFRESH_TOKEN'] = new_refresh_token
+
+        # Save new tokens to .env file
+        with open('.env', 'w') as f:
+            f.write(f"CLIENT_ID={os.getenv('CLIENT_ID')}\n")
+            f.write(f"CLIENT_SECRET={os.getenv('CLIENT_SECRET')}\n")
+            f.write(f"ACCESS_TOKEN={new_access_token}\n")
+            f.write(f"REFRESH_TOKEN={new_refresh_token}\n")
+            f.write(f"REDIRECT_URI={os.getenv('REDIRECT_URI')}\n")
+        
+        return new_access_token
     else:
         print("Error refreshing access token")
         return None
