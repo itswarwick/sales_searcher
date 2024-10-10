@@ -4,6 +4,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from dotenv import load_dotenv
 import os
 import pandas as pd
+import logging
 
 load_dotenv()
 
@@ -13,6 +14,9 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+# Logging configuration
+logging.basicConfig(level=logging.DEBUG)
 
 # Dummy user for authentication
 class User(UserMixin):
@@ -68,29 +72,25 @@ def refresh_access_token():
         os.environ['ACCESS_TOKEN'] = new_access_token
         os.environ['REFRESH_TOKEN'] = new_refresh_token
 
-        # Save new tokens to .env file
-        with open('.env', 'w') as f:
-            f.write(f"CLIENT_ID={os.getenv('CLIENT_ID')}\n")
-            f.write(f"CLIENT_SECRET={os.getenv('CLIENT_SECRET')}\n")
-            f.write(f"ACCESS_TOKEN={new_access_token}\n")
-            f.write(f"REFRESH_TOKEN={new_refresh_token}\n")
-            f.write(f"REDIRECT_URI={os.getenv('REDIRECT_URI')}\n")
+        # Save new tokens to the Render environment
+        logging.info(f"Access token refreshed successfully. New access token: {new_access_token}")
         
         return new_access_token
     else:
-        print("Error refreshing access token")
+        logging.error("Error refreshing access token")
         return None
 
 # Function to retrieve access token, refresh it if needed
 def get_access_token():
     access_token = os.getenv('ACCESS_TOKEN')
-    if access_token is None:
+    if access_token is None or len(access_token) == 0:
         return refresh_access_token()
     return access_token
 
 # Query QuickBooks API for products
 def query_quickbooks(query):
-    api_url = "https://quickbooks.api.intuit.com/v3/company/{realm_id}/query"
+    realm_id = os.getenv('REALM_ID')  # Ensure to set your realm ID in the environment
+    api_url = f"https://quickbooks.api.intuit.com/v3/company/{realm_id}/query"
     access_token = get_access_token()
     
     headers = {
@@ -108,14 +108,13 @@ def query_quickbooks(query):
         products = [item['Name'] for item in data.get('QueryResponse', {}).get('Item', [])]
         return products
     else:
-        print(f"Error fetching products: {response.status_code}")
+        logging.error(f"Error fetching products: {response.status_code}")
         return []
 
 @app.route('/autocomplete', methods=['GET'])
 @login_required
 def autocomplete():
     query = request.args.get('q')
-    # Use the query_quickbooks function to get product suggestions from QuickBooks API
     suggestions = query_quickbooks(query)
     return jsonify(suggestions)
 
@@ -124,8 +123,7 @@ def autocomplete():
 def search():
     if request.method == 'POST':
         item = request.form['item']
-        # Call QuickBooks API to retrieve customers and orders for the selected item
-        orders = query_quickbooks(item)  # You might need to adjust this for order data
+        orders = query_quickbooks(item)
         
         # Create a CSV file with customer details and order history
         df = pd.DataFrame(orders)
@@ -136,5 +134,5 @@ def search():
     return render_template('search.html')
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', 5000))  # Use the 'PORT' environment variable
+    port = int(os.getenv('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
