@@ -86,17 +86,25 @@
     <script>
         function searchItem() {
             var query = document.getElementById('search').value;
-            fetch('/autocomplete?q=' + query)
-                .then(response => response.json())
-                .then(data => {
-                    var suggestions = document.getElementById('suggestions');
-                    suggestions.innerHTML = "";
-                    data.forEach(function(item) {
-                        var div = document.createElement('div');
-                        div.textContent = item;
-                        suggestions.appendChild(div);
+            if (query.length > 2) {  // only trigger search for queries longer than 2 characters
+                fetch('/autocomplete?q=' + query)
+                    .then(response => response.json())
+                    .then(data => {
+                        var suggestions = document.getElementById('suggestions');
+                        suggestions.innerHTML = "";
+                        data.forEach(function(item) {
+                            var div = document.createElement('div');
+                            div.textContent = item;
+                            div.onclick = function() {
+                                document.getElementById('search').value = item;
+                                suggestions.innerHTML = ""; // Clear suggestions when selected
+                            };
+                            suggestions.appendChild(div);
+                        });
                     });
-                });
+            } else {
+                document.getElementById('suggestions').innerHTML = ""; // Clear suggestions if query is too short
+            }
         }
     </script>
 </body>

@@ -76,28 +76,25 @@ def get_access_token():
 
 # Query QuickBooks API for products
 def query_quickbooks(query):
-    api_url = os.getenv('API_URL')  # QuickBooks API URL
-    access_token = get_access_token()  # Ensure we have a valid token
+    api_url = "https://quickbooks.api.intuit.com/v3/company/{realm_id}/query"
+    access_token = get_access_token()
     
     headers = {
-        'Authorization': f'Bearer {access_token}',  # Use OAuth token
+        'Authorization': f'Bearer {access_token}',
         'Accept': 'application/json'
     }
     
-    params = {
-        'query': query,
-        'limit': 10  # Limit the number of results for performance
-    }
+    sql_query = f"SELECT * FROM Item WHERE Name LIKE '{query}%'"
+    params = {'query': sql_query}
     
     response = requests.get(api_url, headers=headers, params=params)
     
     if response.status_code == 200:
         data = response.json()
-        # Extract relevant product names
-        products = [item['name'] for item in data.get('products', [])]
+        products = [item['Name'] for item in data.get('QueryResponse', {}).get('Item', [])]
         return products
     else:
-        print("Error fetching data from QuickBooks API")
+        print(f"Error fetching products: {response.status_code}")
         return []
 
 @app.route('/autocomplete', methods=['GET'])
