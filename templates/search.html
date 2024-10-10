@@ -1,99 +1,103 @@
-from flask import Flask, render_template, redirect, url_for, request, session, jsonify, send_file
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
-from dotenv import load_dotenv
-import os
-import pandas as pd
-import logging
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
 
-# Load environment variables
-load_dotenv()
+        h1 {
+            color: #333;
+        }
 
-app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY') or 'secret_key_here'
-app.config['TEMPLATES_AUTO_RELOAD'] = True  # Enable template auto-reload
+        .form-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 340px;
+            text-align: center;
+        }
 
-# Set up logging
-logging.basicConfig(level=logging.DEBUG)
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0 20px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
 
-login_manager = LoginManager()
-login_manager.init_app(app)
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
 
-# Dummy user for authentication
-class User(UserMixin):
-    def __init__(self, id):
-        self.id = id
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User(user_id)
+        #suggestions {
+            margin-top: 10px;
+            text-align: left;
+        }
 
-@app.route('/')
-def home():
-    return render_template('index.html')
+        #suggestions div {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        if request.form['password'] == os.getenv('PASSWORD'):
-            user = User(id=1)
-            login_user(user)
-            return redirect(url_for('search'))
-    return render_template('login.html')
+        #suggestions div:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Search for an item</h1>
+        <form method="POST">
+            <input type="text" id="search" name="item" placeholder="Search for an item" onkeyup="searchItem()">
+            <div id="suggestions"></div>
+            <input type="submit" value="Search">
+        </form>
+    </div>
 
-@app.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for('login'))
-
-# Autocomplete route for product suggestions
-@app.route('/autocomplete', methods=['GET'])
-@login_required
-def autocomplete():
-    query = request.args.get('q')
-    logging.debug(f"Query received: {query}")
-    
-    try:
-        # Simulate API call to QuickBooks and return dummy data for now
-        suggestions = query_quickbooks(query)  # Replace with actual QuickBooks query
-        logging.debug(f"Suggestions returned: {suggestions}")
-        return jsonify(suggestions)
-    except Exception as e:
-        logging.error(f"Error during QuickBooks query: {e}")
-        return jsonify([]), 500
-
-# Search route that will generate a CSV
-@app.route('/search', methods=['GET', 'POST'])
-@login_required
-def search():
-    if request.method == 'POST':
-        item = request.form['item']
-        logging.debug(f"Search initiated for item: {item}")
-
-        try:
-            # Simulate QuickBooks API call and generate dummy order data
-            orders = query_quickbooks(item)  # Replace with actual QuickBooks query
-            logging.debug(f"Orders retrieved: {orders}")
-
-            # Create CSV from the data
-            df = pd.DataFrame(orders)
-            csv_path = 'customer_orders.csv'
-            df.to_csv(csv_path, index=False)
-
-            logging.debug(f"CSV file created at {csv_path}")
-            return send_file(csv_path, as_attachment=True)
-        except Exception as e:
-            logging.error(f"Error processing search: {e}")
-            return "Internal Server Error", 500
-
-    return render_template('search.html')
-
-def query_quickbooks(query):
-    # Simulate the QuickBooks API call
-    logging.debug(f"Simulating QuickBooks API call for query: {query}")
-    # Here you'd add the actual logic to call QuickBooks API
-    return ["Product1", "Product2"]  # Replace with actual data from API
-
-if __name__ == '__main__':
-    port = int(os.getenv('PORT', 5000))  # Use the 'PORT' environment variable
-    app.run(host='0.0.0.0', port=port, debug=True)
+    <script>
+        function searchItem() {
+            var query = document.getElementById('search').value;
+            fetch('/autocomplete?q=' + query)
+                .then(response => response.json())
+                .then(data => {
+                    var suggestions = document.getElementById('suggestions');
+                    suggestions.innerHTML = "";
+                    data.forEach(function(item) {
+                        var div = document.createElement('div');
+                        div.textContent = item;
+                        suggestions.appendChild(div);
+                    });
+                });
+        }
+    </script>
+</body>
+</html>
