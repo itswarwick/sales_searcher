@@ -35,21 +35,27 @@ function SalesSearcher() {
             </div>
 
             <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {results.map((result) => (
-                        <tr key={result.id}>
-                            <td>{result.id}</td>
-                            <td>{result.name}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+    <thead>
+        <tr>
+            <th>Customer Name</th>
+            <th>Customer Email</th>
+            <th># of Purchases</th>
+            <th>Total $ Spent</th>
+            <th>Date of Last Purchase</th>
+        </tr>
+    </thead>
+    <tbody>
+        {results.map((result) => (
+            <tr key={result.id}>
+                <td>{result.customerName}</td>
+                <td>{result.customerEmail}</td>
+                <td>{result.numPurchases}</td>
+                <td>{result.totalSpent}</td>
+                <td>{result.lastPurchaseDate}</td>
+            </tr>
+        ))}
+    </tbody>
+</table>
         </div>
     );
 }
