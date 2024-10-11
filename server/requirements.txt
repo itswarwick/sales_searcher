@@ -1,0 +1,9 @@
+Flask==2.0.1
+Flask-Login
+Flask-CORS==3.0.10
+requests
+pandas
+python-dotenv
+gunicorn
+python-quickbooks
+Werkzeug==2.0.3

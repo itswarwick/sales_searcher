@@ -1,0 +1,92 @@
+/* Dashboard-specific styling */
+.dashboard-container {
+    text-align: center;
+    padding-top: 20px;
+}
+
+.nav-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    position: sticky;
+    top: 0;
+}
+
+.nav-buttons button {
+    padding: 10px 20px;
+    border: 2px solid #0084bd;
+    background-color: transparent;
+    color: #000000;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.nav-buttons button.active {
+    background-color: #0084bd;
+    color: white;
+}
+
+.nav-buttons button:hover {
+    background-color: #0072a0;
+    color: white;
+}
+
+.dashboard-content {
+    margin-top: 20px;
+}
+
+/* Sales Searcher Styling */
+.table-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.sales-searcher input {
+    padding: 0 0 0 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    flex: 1;
+    margin-right: 10px;
+    height: 38px;
+}
+
+.download-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    background-color: #0084bd;
+    color: white;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    height: 38px;
+}
+
+.download-btn img {
+    width: 16px;
+    height: 16px;
+    margin-right: 5px;
+}
+
+.download-btn:hover {
+    background-color: #0072a0;
+}
+
+.sales-searcher table {
+    margin-top: 20px;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.sales-searcher table th,
+.sales-searcher table td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+}
